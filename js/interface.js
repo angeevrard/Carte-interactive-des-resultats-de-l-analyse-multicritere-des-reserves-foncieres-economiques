@@ -248,7 +248,7 @@ function initTheme() {
     // navigateur en navigation privee ou localStorage bloque -> tant pis,
     // on reste juste sur le theme par defaut
   }
-  if (themeSauvegarde === "sombre") {
+  if (themeSauvegarde !== "clair") {
     document.body.classList.add("sombre");
   }
   mettreAJourIconeTheme();
