@@ -1,8 +1,8 @@
 # Carte interactive des réserves foncières économiques
 
-Carte de restitution des résultats de l'analyse multicritère AHP, réalisée en HTML / CSS / JavaScript avec Leaflet (carte + clusters) et D3 (radar). Aucun framework, aucune dépendance à installer — juste des fichiers statiques.
+Carte de restitution des résultats de l'analyse multicritère, réalisée en HTML / CSS / JavaScript avec Leaflet (carte + clusters) et D3 (radar). Aucun framework, aucune dépendance à installer — juste des fichiers statiques.
 
-## Lancer le projet
+## Lancer le projet en local 
 
 Le fichier `index.html` charge les GeoJSON via `fetch()`, ce qui ne fonctionne pas en ouvrant directement le fichier avec `file://` (bloqué par le navigateur). Il faut servir le dossier avec un petit serveur local, par exemple :
 
@@ -13,11 +13,9 @@ python3 -m http.server 8000
 
 Puis ouvrir `http://localhost:8000` dans le navigateur.
 
-Une fois déployé sur un vrai hébergeur (GitHub Pages, etc.), servi en https, plus besoin de ce serveur local.
-
 ## Fonctionnalités
 
-**Deux modes d'affichage**, dans la section "Résultats affichés" de la sidebar (mutuellement exclusifs, comme des boutons radio) :
+**Deux modes d'affichage** :
 - **Résultat général** : colore les réserves selon le score final, légende "Classification du potentiel de mobilisation" (3 classes), panneau de droite avec radar.
 - **Détail de l'analyse par famille de critères** : un sélecteur apparaît pour choisir la famille (4 possibles), colore les réserves selon le score de cette famille, légende "Aptitude à la famille de critères" (favorable/modérée/défavorable), panneau de droite qui remplace le radar par le détail des sous-critères de la famille choisie.
 
@@ -25,37 +23,28 @@ Une fois déployé sur un vrai hébergeur (GitHub Pages, etc.), servi en https, 
 - Clusters de points à faible zoom, qui éclatent en parcelles + contours de zonage économique au-delà du zoom 13 (`SEUIL_ZOOM_DETAIL`) ou au clic sur un cluster.
 - 3 fonds de carte au choix (menu en haut à droite) : clair (Positron, par défaut), OSM standard, satellite (Google).
 - Limites administratives (communes, EPCI, périmètre du SCoT) affichées à tous les niveaux de zoom, chacune activable/désactivable indépendamment.
-- Bouton "Réinitialiser la carte" (revient à l'emprise de départ) et "Afficher l'aide" (ouverte par défaut au chargement), tous deux sous le zoom.
+- Bouton "Réinitialiser la carte" (revient à l'emprise de départ) et "Afficher l'aide" (ouverte par défaut au chargement).
 - Badge en haut de la carte rappelant ce qui est affiché ("Résultat général" ou le nom de la famille regardée).
-- Petit cadre de légende des tracés en bas à droite de la carte (toujours blanc, même en mode sombre, pour rester lisible sur tous les fonds).
+- Petit cadre de légende des tracés en bas à droite de la carte.
 
-**Panneau de détail** (clic sur une réserve) : EPCI, commune, surface, score et classification, puis soit le radar des 4 familles (mode "Résultat général" — survol = score, clic sur un sommet = détail des sous-critères en valeurs brutes), soit directement le détail de la famille choisie (mode "Détail par famille").
+**Panneau de détail** (clic sur une réserve pour afficher ses détails) : EPCI, commune, surface, score et classification, puis soit le radar des 4 familles (mode "Résultat général" — survol = score, clic sur un sommet = détail des sous-critères en valeurs brutes), soit directement le détail de la famille choisie (mode "Détail par famille").
 
 **Mode sombre/clair** (bouton dans l'en-tête), mémorisé d'une visite à l'autre via `localStorage`.
 
 ## Données
 
-Les fichiers dans `data/` sont les exports du plugin QGIS (23 réserves, Eurométropole de Strasbourg + communautés de communes voisines).
+Les fichiers dans `data/` sont les exports de l'analyse via le plugin QGIS.
 
 - **`Resultat_RF_ahp.geojson`** — polygones des parcelles. Champs utilisés : `ID`, `commune`, `epci`, `superficie_ha`, `score_final`, `classe_apt`, `rang`, les 4 scores de famille (`mf_attractivite_geog`, `mf_aptitude_aux_rese`, `mf_enjeux_forestiers`, `mf_aptitude_physique`), les 15 sous-critères standardisés (`std_...`, valeurs 0-1) et leurs 15 équivalents en valeurs brutes non standardisées (mêmes noms sans le préfixe `std_`, ex. `acess_TC`), affichées dans le tableau de détail au clic sur un sommet du radar.
-- **`Centroide_RF.geojson`** — mêmes propriétés, géométrie `Point` (centroïde de chaque parcelle). Sert à la couche de clusters. **Doit rester généré à partir des mêmes données que `Resultat_RF_ahp.geojson`** (mêmes scores/classes) — sinon parcelles et clusters affichent des couleurs différentes selon le zoom.
-- **`Contours_zonage_eco.geojson`** — contours de zonage économique (contexte), affichés à partir du zoom détaillé ou après un clic sur un cluster. Pas d'attributs identifiants, juste les critères bruts.
-- **`COMMUNE.geojson`**, **`EPCI.geojson`**, **`SCOTERS.geojson`** — limites administratives, indépendantes des données AHP.
-
-### Si tu remplaces `Resultat_RF_ahp.geojson` par un nouvel export QGIS
-
-Vérifie que le nouveau fichier contient bien `ID`, `commune`, `epci` et `superficie_ha` — certains exports QGIS ne recalculent que les champs liés à l'analyse (scores, `classe_apt`) et omettent ces champs "administratifs". S'ils manquent, il faut les réinjecter depuis l'ancien fichier (par correspondance du champ `fid`, stable d'un export à l'autre) avant de remplacer le fichier. Et il faut **recréer `Centroide_RF.geojson`** à partir des nouvelles géométries (voir ci-dessus).
+- **`Centroide_RF.geojson`** — mêmes propriétés, géométrie `Point` (centroïde de chaque parcelle). Sert à la couche de clusters. **Doit rester généré à partir des mêmes données que `Resultat_RF_ahp.geojson`** (mêmes scores/classes).
+- **`Contours_zonage_eco.geojson`** — contours de zonage économique, affichés à partir du zoom détaillé ou après un clic sur un cluster. Pas d'attributs identifiants, juste les critères bruts.
+- **`COMMUNE.geojson`**, **`EPCI.geojson`**, **`SCOTERS.geojson`** — limites administratives du territoire d'étude.
 
 ### Classification
 
-3 classes, seuils `< 0,33`, `0,33 – 0,67`, `≥ 0,67`. La couleur affichée (sur la carte et dans le panneau) est **toujours recalculée depuis le score numérique** (`classeDepuisValeur()` dans `carte.js`, valeur arrondie à 2 décimales avant comparaison) — jamais depuis le texte du champ `classe_apt`. Ce texte sert uniquement à l'affichage. C'est volontaire : ça évite qu'un écart de texte (accent, espace, reformulation) entre le JS et le GeoJSON casse silencieusement les couleurs.
+3 classes, seuils `< 0,33`, `0,33 – 0,67`, `≥ 0,67`. La couleur affichée (sur la carte et dans le panneau) est **toujours recalculée depuis le score numérique** (`classeDepuisValeur()` dans `carte.js`, valeur arrondie à 2 décimales avant comparaison).
 
-Si tu changes le texte des classes (`COULEURS_CLASSES` dans `carte.js`), pense à répercuter le même texte dans :
-- `CORRESPONDANCE_APTITUDE` (juste en dessous, pour le mode "Détail par famille")
-- `classeDepuisValeur()` (mêmes libellés, seuils inchangés)
-- la légende dans `index.html` (`tableau-legende-general`)
-
-## Où modifier quoi
+## Architecture du dossier de la carte interactive
 
 | Fichier | Contenu |
 |---|---|
@@ -64,6 +53,5 @@ Si tu changes le texte des classes (`COULEURS_CLASSES` dans `carte.js`), pense �
 | `js/carte.js` | Carte Leaflet, couches, couleurs des classes, noms des familles/sous-critères, seuils, zoom de bascule clusters/parcelles |
 | `js/radar.js` | Graphique radar D3 et tableau de détail par famille |
 | `js/interface.js` | Cases à cocher, sélecteurs, ouverture/fermeture du panneau, bascule des deux modes |
-| `data/*.geojson` | Les données elles-mêmes |
+| `data/*.geojson` | Les données |
 
-Le nom d'une famille de critères est à changer à deux endroits : `LIBELLES_FAMILLES` (nom complet, utilisé dans le menu déroulant et les titres) et `LIBELLES_FAMILLES_COURT` (version pour les axes du radar, où la place manque) — tous deux en haut de `js/carte.js`.
