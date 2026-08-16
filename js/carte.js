@@ -75,9 +75,9 @@ const SOUS_CRITERES_PAR_FAMILLE = {
 };
 
 const LIBELLES_SOUS_CRITERES = {
-  std_acess_TC: "Accessibilité en transport en commun",
+  std_acess_TC: "Accessibilité en transport en commun (par la marche)",
   std_articu_piste_cyclable: "Articulation aux pistes cyclables",
-  std_acess_restauration: "Accès aux services de restauration",
+  std_acess_restauration: "Accès aux services de restauration (par la marche)",
   std_acess_echangeur: "Accès à un échangeur",
   std_posi_armature_urbaine: "Position dans l'armature urbaine",
   std_proximite_res_elect: "Proximité aux réseaux électriques",
