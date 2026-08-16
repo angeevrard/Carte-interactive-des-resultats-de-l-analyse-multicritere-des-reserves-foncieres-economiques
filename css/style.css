@@ -1,0 +1,603 @@
+/* ==========================================================
+   style.css
+   Feuille de style de la carte interactive des réserves foncières
+   Mémoire - analyse multicritère AHP
+   ========================================================== */
+
+/* reset rapide, rien de fancy */
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+:root {
+  /* couleurs reprises de la maquette */
+  --couleur-header: #0b2545;
+  --couleur-accent: #1d5c56;
+  --couleur-texte: #1f2937;
+  --couleur-texte-clair: #6b7280;
+  --couleur-bordure: #e5e7eb;
+  --couleur-fond: #f5f6f8;
+  --couleur-surface: #ffffff;
+  --couleur-surface-alt: #f7f8fa;
+
+  /* couleurs des classes de potentiel (doivent matcher carte.js !) */
+  --classe-non-mobilisable: #b0b0b0;
+  --classe-faible: #f2d94e;
+  --classe-modere: #b7ddb0;
+  --classe-eleve: #5cb8a8;
+  --classe-tres-eleve: #1d5c56;
+}
+
+/* mode sombre : on redefinit juste les variables, tout le reste de la
+   feuille de style suit automatiquement puisqu'il utilise var(...) */
+body.sombre {
+  --couleur-texte: #e5e7eb;
+  --couleur-texte-clair: #9aa1ac;
+  --couleur-bordure: #2f333b;
+  --couleur-fond: #0f1115;
+  --couleur-surface: #1a1d22;
+  --couleur-surface-alt: #22262c;
+  --couleur-accent: #4fd8c4;
+}
+
+body {
+  transition: background-color 0.15s ease, color 0.15s ease;
+}
+
+body {
+  font-family: "Segoe UI", Arial, sans-serif;
+  color: var(--couleur-texte);
+  background: var(--couleur-fond);
+  font-size: 14px;
+}
+
+/* ---------- en-tete ---------- */
+
+#entete {
+  background: var(--couleur-header);
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 20px;
+  height: 60px;
+}
+
+#entete .bloc-titre {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+#entete h1 {
+  font-size: 17px;
+  font-weight: 600;
+}
+
+#entete .sous-titre {
+  font-size: 12px;
+  color: #b7c4dd;
+  margin-top: 1px;
+}
+
+#entete nav {
+  display: flex;
+  gap: 18px;
+  font-size: 13px;
+}
+
+#entete nav button {
+  background: none;
+  border: none;
+  color: #d7deee;
+  cursor: pointer;
+  font-size: 13px;
+}
+
+#entete nav button:hover {
+  color: white;
+}
+
+/* ---------- structure generale : sidebar / carte+tableau / panneau droit ---------- */
+
+#conteneur-principal {
+  display: flex;
+  align-items: flex-start;
+}
+
+/* -------------- barre laterale gauche -------------- */
+
+#barre-laterale {
+  width: 300px;
+  flex-shrink: 0;
+  background: var(--couleur-surface);
+  border-right: 1px solid var(--couleur-bordure);
+  padding: 16px;
+  height: calc(100vh - 60px);
+  overflow-y: auto;
+}
+
+#barre-laterale section {
+  margin-bottom: 20px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid var(--couleur-bordure);
+}
+
+#barre-laterale section:last-child {
+  border-bottom: none;
+}
+
+#barre-laterale h2 {
+  font-size: 12px;
+  text-transform: none;
+  color: var(--couleur-texte);
+  font-weight: 600;
+  margin-bottom: 8px;
+}
+
+#selecteur-epci, #selecteur-famille {
+  width: 100%;
+  padding: 6px 8px;
+  border: 1px solid var(--couleur-bordure);
+  border-radius: 6px;
+  font-size: 13px;
+  background: var(--couleur-surface);
+  color: var(--couleur-texte);
+}
+
+.ligne-case {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  margin-bottom: 6px;
+  color: var(--couleur-texte);
+}
+
+/* legende : petit tableau score -> classe, comme dans le document du memoire.
+   deux variantes (resultat general / detail par famille), une seule des
+   deux visible a la fois -> cf interface.js */
+
+#tableau-legende-general, #tableau-legende-famille {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 12px;
+}
+
+#tableau-legende-general th, #tableau-legende-famille th {
+  text-align: left;
+  font-weight: 600;
+  color: var(--couleur-texte-clair);
+  padding: 4px 6px;
+  border-bottom: 1px solid var(--couleur-bordure);
+}
+
+#tableau-legende-general td, #tableau-legende-famille td {
+  padding: 4px 6px;
+  border-bottom: 1px solid var(--couleur-bordure);
+  white-space: nowrap;
+}
+
+.cellule-classe {
+  display: block;
+  padding: 3px 6px;
+  border-radius: 4px;
+  color: white;
+  font-weight: 600;
+  text-align: center;
+  font-size: 11.5px;
+}
+
+/* bloc methodologie */
+
+#methodologie p {
+  font-size: 12px;
+  color: var(--couleur-texte-clair);
+  line-height: 1.5;
+  margin-bottom: 6px;
+}
+
+/* -------------- colonne centrale : carte + tableau -------------- */
+
+#colonne-centrale {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  position: relative; /* necessaire pour positionner l'indicateur au-dessus de la carte */
+}
+
+#carte {
+  height: calc(100vh - 60px);
+  width: 100%;
+  background: #eef1ec;
+}
+
+/* on garde les popups/tooltips leaflet sobres, sans le style par defaut trop charge */
+.etiquette-reserve {
+  background: white;
+  border: 1px solid var(--couleur-bordure);
+  border-radius: 4px;
+  padding: 2px 6px;
+  font-size: 11px;
+  font-weight: 600;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.15);
+}
+
+/* boutons "Reinitialiser la carte" / "Afficher l'aide" sous le zoom */
+.leaflet-bouton-texte {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: var(--couleur-surface);
+  color: var(--couleur-texte);
+  border: none;
+  border-radius: 4px;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.3);
+  padding: 6px 10px 6px 6px;
+  margin-top: 5px;
+  font-size: 12px;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.leaflet-bouton-texte:hover {
+  background: var(--couleur-surface-alt);
+}
+
+.leaflet-bouton-icone {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  height: 18px;
+  border-radius: 3px;
+  background: #2a5c8a;
+  color: white;
+  font-size: 11px;
+  flex-shrink: 0;
+}
+
+/* panneau d'aide qui s'ouvre sous les boutons zoom/reinitialiser/aide */
+#aide-carte {
+  position: absolute;
+  top: 160px;
+  left: 10px;
+  z-index: 999;
+  /* volontairement fixe (pas de var(--couleur-surface)), comme le cadre
+     de legende : reste blanc meme en mode sombre */
+  background: #ffffff;
+  color: #1f2937;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25);
+  padding: 12px 14px;
+  width: 250px;
+  font-size: 12.5px;
+}
+
+.entete-aide-carte {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 8px;
+  font-size: 13px;
+}
+
+#bouton-fermer-aide {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: #6b7280;
+  font-size: 14px;
+}
+
+#aide-carte ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+#aide-carte li {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  padding: 4px 0;
+  line-height: 1.4;
+}
+
+.icone-aide {
+  flex-shrink: 0;
+  width: 18px;
+  text-align: center;
+}
+
+.texte-aide {
+  flex: 1;
+}
+
+/* petit badge au-dessus de la carte, entre le zoom (a gauche) et le
+   selecteur de fond de carte (a droite), qui rappelle ce qu'on observe :
+   "Resultat general" ou le nom de la famille de criteres en cours */
+#indicateur-actif-carte {
+  position: absolute;
+  top: 10px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 1000;
+  background: var(--couleur-surface);
+  color: var(--couleur-texte);
+  padding: 6px 16px;
+  border-radius: 6px;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.3);
+  font-size: 13px;
+  font-weight: 600;
+  max-width: 60%;
+  text-align: center;
+  pointer-events: none; /* ne doit pas gener le glisser/zoomer de la carte en dessous */
+}
+
+/* petit cadre de legende en bas a droite de la carte : explique les
+   differents traces (limites administratives, zonage, parcelle). les
+   couleurs/styles reprennent exactement ceux de carte.js, a garder
+   synchro si je change quelque chose la-bas */
+#legende-carte {
+  position: absolute;
+  bottom: 10px;
+  right: 10px;
+  z-index: 999;
+  /* volontairement fixe (pas de var(--couleur-surface)) : ce cadre reste
+     blanc meme en mode sombre, pour rester lisible sur n'importe quel
+     fond de carte (satellite, positron...) */
+  background: #ffffff;
+  color: #1f2937;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25);
+  padding: 10px 12px;
+  font-size: 11.5px;
+  max-width: 220px;
+}
+
+.titre-legende-carte {
+  font-weight: 600;
+  font-size: 12.5px;
+  margin-bottom: 6px;
+}
+
+.ligne-legende-carte {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 3px 0;
+  line-height: 1.3;
+}
+
+/* traits (limites administratives + zonage) : meme couleur/epaisseur/style
+   que les couches correspondantes sur la carte */
+.trait-legende {
+  display: inline-block;
+  width: 22px;
+  flex-shrink: 0;
+  border-top-style: solid;
+}
+
+.trait-commune {
+  border-top: 1px solid #9ca3af;
+}
+
+.trait-epci {
+  border-top: 2px solid #2a5c8a;
+}
+
+.trait-scot {
+  border-top: 3px dashed #d7263d;
+}
+
+.trait-zonage {
+  border-top: 2px dashed #0b2545;
+}
+
+/* petit rectangle orange a bordure marine = parcelle de reserve fonciere */
+.swatch-legende.swatch-reserve {
+  display: inline-block;
+  width: 18px;
+  height: 13px;
+  background: #f2a65a;
+  border: 2px solid #0b2545;
+  border-radius: 2px;
+  flex-shrink: 0;
+}
+
+/* -------------- panneau de droite : detail de la reserve -------------- */
+
+#panneau-detail {
+  width: 340px;
+  flex-shrink: 0;
+  background: var(--couleur-surface);
+  border-left: 1px solid var(--couleur-bordure);
+  padding: 16px;
+  height: calc(100vh - 60px);
+  overflow-y: auto;
+}
+
+/* utilitaire generique pour cacher un bloc (message vide / contenu detail) */
+.cache {
+  display: none !important;
+}
+
+#panneau-detail .entete-panneau {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 14px;
+}
+
+#panneau-detail .entete-panneau h2 {
+  font-size: 16px;
+  font-weight: 600;
+}
+
+#bouton-fermer-panneau {
+  background: none;
+  border: none;
+  font-size: 16px;
+  cursor: pointer;
+  color: var(--couleur-texte-clair);
+}
+
+.ligne-info {
+  display: flex;
+  justify-content: space-between;
+  font-size: 13px;
+  padding: 4px 0;
+}
+
+.ligne-info .label {
+  color: var(--couleur-texte-clair);
+}
+
+/* bloc score final bien visible */
+
+#bloc-score-final {
+  margin: 14px 0;
+  padding: 12px;
+  background: var(--couleur-surface-alt);
+  border-radius: 8px;
+}
+
+#bloc-score-final .ligne-info .valeur {
+  font-weight: 600;
+}
+
+#valeur-score-final {
+  font-size: 20px;
+  color: var(--couleur-accent);
+}
+
+/* petite aide au-dessus du radar */
+.astuce-radar {
+  font-size: 11.5px;
+  color: var(--couleur-texte-clair);
+  margin-bottom: 6px;
+}
+
+/* svg du radar, D3 dessine dedans */
+#radar-conteneur {
+  width: 100%;
+}
+
+text.axe-radar {
+  font-size: 10px;
+  fill: var(--couleur-texte-clair);
+}
+
+.grille-radar {
+  fill: none;
+  stroke: var(--couleur-bordure);
+}
+
+.aire-radar {
+  fill: var(--couleur-accent);
+  fill-opacity: 0.25;
+  stroke: var(--couleur-accent);
+  stroke-width: 2;
+}
+
+.point-radar {
+  fill: var(--couleur-accent);
+}
+
+/* petite etiquette qui affiche le score au survol d'un sommet du radar */
+.etiquette-survol-radar {
+  font-size: 12px;
+  font-weight: 600;
+  fill: var(--couleur-texte);
+  text-anchor: middle;
+  pointer-events: none;
+}
+
+/* tableau de detail (sous-criteres, valeurs brutes) qui apparait sous le
+   radar quand on clique sur un sommet -- cf radar.js */
+#detail-famille-clic {
+  margin-top: 6px;
+  padding-top: 8px;
+  border-top: 1px solid var(--couleur-bordure);
+}
+
+/* petit sur-titre affiche uniquement quand le detail vient d'un clic sur
+   un sommet du radar (en mode "Resultat general") -- inutile de le
+   repeter en mode "Detail par famille" ou le titre principal du panneau
+   dit deja la meme chose (cf mettreAJourProfilPanneau) */
+#sous-titre-detail-famille {
+  font-size: 11.5px;
+  color: var(--couleur-texte-clair);
+  margin-bottom: 2px;
+}
+
+table#tableau-detail-famille {
+  width: 100%;
+  font-size: 12.5px;
+  border-collapse: collapse;
+}
+
+table#tableau-detail-famille th {
+  text-align: left;
+  color: var(--couleur-texte-clair);
+  font-weight: 600;
+  padding: 4px 0;
+  border-bottom: 1px solid var(--couleur-bordure);
+}
+
+table#tableau-detail-famille td {
+  padding: 4px 0;
+  border-bottom: 1px solid var(--couleur-bordure);
+}
+
+table#tableau-detail-famille td:last-child {
+  text-align: right;
+}
+
+/* petit message par defaut quand rien n'est selectionne (garde au cas ou,
+   mais le panneau est maintenant entierement cache par defaut) */
+
+/* bouton mode sombre/clair dans l'entete */
+#bouton-theme {
+  font-size: 13px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+#icone-theme {
+  font-size: 15px;
+}
+
+/* habillage sombre pour les controles leaflet (zoom, echelle, switch de
+   fond de carte) -- pas parfait pixel par pixel mais largement suffisant */
+body.sombre .leaflet-control-layers,
+body.sombre .leaflet-bar a,
+body.sombre .leaflet-bouton-texte {
+  background: var(--couleur-surface);
+  color: var(--couleur-texte);
+  border-color: var(--couleur-bordure);
+}
+
+body.sombre .leaflet-control-layers-toggle {
+  filter: invert(1);
+}
+
+body.sombre .leaflet-control-scale-line {
+  background: rgba(26, 29, 34, 0.75);
+  color: var(--couleur-texte);
+  border-color: var(--couleur-texte-clair);
+}
+
+/* leaflet ajoute un contour de focus (accessibilite clavier) sur les
+   polygones cliques -> le petit rectangle disgracieux qu'on voit au clic
+   sur une commune. on le desactive, le survol/tooltip suffit ici */
+.leaflet-interactive:focus {
+  outline: none;
+}

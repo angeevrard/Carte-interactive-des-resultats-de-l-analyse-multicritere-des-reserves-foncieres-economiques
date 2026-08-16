@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Carte interactive des réserves foncières économiques</title>
+
+  <!-- Leaflet : le fond de carte + les interactions de base -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+
+  <!-- Leaflet.markercluster : pour le regroupement des points a petite echelle -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.css" />
+  <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.Default.css" />
+
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+
+  <!-- ====================== EN-TETE ====================== -->
+  <header id="entete">
+    <div class="bloc-titre">
+      <div>
+        <h1>Résultats de l'Evaluation du potentiel de mobilisation des réserves foncières économiques à urbaniser : les zonages 1AU et 2AU</h1>
+        <div class="sous-titre">Térritoire d'étude de cas : Le SCoT de la Région de Strasbourg</div>
+      </div>
+    </div>
+    <nav>
+      <button id="bouton-theme" title="Changer de thème">
+        <span id="icone-theme">🌙</span> Activer / Désactiver le mode sombre
+      </button>
+    </nav>
+  </header>
+
+  <div id="conteneur-principal">
+
+    <!-- ====================== BARRE LATERALE GAUCHE ====================== -->
+    <aside id="barre-laterale">
+
+      <section id="bloc-resultat">
+        <h2>Résultats affichés</h2>
+        <label class="ligne-case">
+          <input type="checkbox" id="case-resultat-general" checked />
+          Résultat général
+        </label>
+        <label class="ligne-case">
+          <input type="checkbox" id="case-detail-famille" />
+          Détail de l'analyse par famille de critères
+        </label>
+        <select id="selecteur-famille" class="cache">
+          <option value="mf_attractivite_geog">Attractivité géographique</option>
+          <option value="mf_aptitude_aux_rese">Aptitude aux réseaux techniques et à la mutualisation des équipements et services</option>
+          <option value="mf_enjeux_forestiers">Enjeux forestiers, écologiques et de risques naturels</option>
+          <option value="mf_aptitude_physique">Aptitude physique et foncière</option>
+        </select>
+      </section>
+
+      <section id="legende">
+        <h2 id="titre-legende">Classification du potentiel de mobilisation</h2>
+
+        <!-- legende du resultat general (score final), visible par defaut -->
+        <table id="tableau-legende-general">
+          <thead>
+            <tr><th>Score final</th><th>Classification</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>0,00 ≤ S &lt; 0,33</td>
+              <td><span class="cellule-classe" style="background:#e8735c">Faible potentiel</span></td>
+            </tr>
+            <tr>
+              <td>0,33 ≤ S &lt; 0,67</td>
+              <td><span class="cellule-classe" style="background:#f2a65a">Potentiel modéré</span></td>
+            </tr>
+            <tr>
+              <td>0,67 ≤ S ≤ 1</td>
+              <td><span class="cellule-classe" style="background:#6fb57b">Potentiel élevé</span></td>
+            </tr>
+          </tbody>
+        </table>
+
+        <!-- legende du detail par famille de criteres, cachee tant que la
+             case correspondante n'est pas cochee (cf interface.js) -->
+        <table id="tableau-legende-famille" class="cache">
+          <thead>
+            <tr><th>Score</th><th>Aptitude</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>0,00 ≤ S &lt; 0,33</td>
+              <td><span class="cellule-classe" style="background:#e8735c">Aptitude défavorable</span></td>
+            </tr>
+            <tr>
+              <td>0,33 ≤ S &lt; 0,67</td>
+              <td><span class="cellule-classe" style="background:#f2a65a">Aptitude modérée</span></td>
+            </tr>
+            <tr>
+              <td>0,67 ≤ S ≤ 1</td>
+              <td><span class="cellule-classe" style="background:#6fb57b">Aptitude favorable</span></td>
+            </tr>
+          </tbody>
+        </table>
+
+      </section>
+
+      <section>
+        <label class="ligne-case">
+          <input type="checkbox" id="case-labels" checked />
+          Afficher les labels
+        </label>
+        <label class="ligne-case">
+          <input type="checkbox" id="case-filtrer-epci" />
+          Filtrer par EPCI
+        </label>
+        <select id="selecteur-epci" disabled>
+          <option value="">Sélectionner un EPCI</option>
+          <!-- les options sont ajoutees dynamiquement par interface.js une fois les donnees chargees -->
+        </select>
+      </section>
+
+      <section id="limites-administratives">
+        <h2>Limites administratives</h2>
+        <label class="ligne-case">
+          <input type="checkbox" id="case-limite-commune" checked />
+          Communes
+        </label>
+        <label class="ligne-case">
+          <input type="checkbox" id="case-limite-epci" checked />
+          EPCI
+        </label>
+        <label class="ligne-case">
+          <input type="checkbox" id="case-limite-scot" checked />
+          Périmètre SCoT
+        </label>
+      </section>
+
+      <section id="methodologie">
+        <h2>Méthodologie</h2>
+        <p>Évaluation du potentiel de mobilisation des réserves foncières à urbaniser par <strong>approche SIG-AMC</strong>, selon les méthodes <strong>d'aggrégation multicritère AHP (Analytic Hierachy Process)</strong> et la <strong>combinaison linéaire pondérée (SAW)</strong>.</p>
+        <p>La méthode d’analyse multicritère AHP consiste à décomposer un problème en plusieurs niveaux hiérarchiques comprenant généralement un objectif principal, des critères - également appelés familles de critères - et, le cas échéant, des sous-critères, puis à déterminer leur importance relative au moyen de comparaisons par paires (Saaty, 1990).</p>
+      </section>
+
+    </aside>
+
+    <!-- ====================== CARTE ====================== -->
+    <div id="colonne-centrale">
+      <div id="carte"></div>
+      <div id="indicateur-actif-carte">Résultat général</div>
+
+      <!-- panneau d'aide, cache par defaut, ouvert via le bouton
+           "Afficher l'aide" ajoute dans carte.js -->
+      <div id="aide-carte">
+        <div class="entete-aide-carte">
+          <strong>Comment utiliser la carte</strong>
+          <button id="bouton-fermer-aide" title="Fermer l'aide">✕</button>
+        </div>
+        <ul>
+          <li><span class="icone-aide">🔄</span><span class="texte-aide">Réinitialisez la carte</span></li>
+          <li><span class="icone-aide">➕</span><span class="texte-aide">Zoomez/Dézoomez</span></li>
+          <li><span class="icone-aide">🗺️</span><span class="texte-aide">Fond de carte modifiable</span></li>
+          <li><span class="icone-aide">☑️</span><span class="texte-aide">Activez/désactivez les couches (limites administratives) et les filtres</span></li>
+          <li><span class="icone-aide">🖱️</span><span class="texte-aide">Cliquez sur une réserve foncière pour voir son profil multicritère</span></li>
+          <li><span class="icone-aide">🔵</span><span class="texte-aide">Cliquez sur un groupe de points (clusters) ou zoomez pour voir la réserve foncière</span></li>
+        </ul>
+      </div>
+
+      <!-- petit cadre de legende en bas a droite de la carte, pour les
+           traces (limites administratives, zonage, parcelle) -->
+      <div id="legende-carte">
+        <p class="titre-legende-carte">Légende des tracés</p>
+        <div class="ligne-legende-carte"><span class="trait-legende trait-commune"></span>Limite communale</div>
+        <div class="ligne-legende-carte"><span class="trait-legende trait-epci"></span>Limite d'EPCI</div>
+        <div class="ligne-legende-carte"><span class="trait-legende trait-scot"></span>Périmètre du SCoT</div>
+        <div class="ligne-legende-carte"><span class="trait-legende trait-zonage"></span>Contour de la zone d'activité économique prévue</div>
+        <div class="ligne-legende-carte"><span class="swatch-legende swatch-reserve"></span>Réserve foncière analysée</div>
+      </div>
+    </div>
+
+    <!-- ====================== PANNEAU DE DROITE : DETAIL RESERVE ====================== -->
+    <!-- cache par defaut (classe "cache"), affiche uniquement au clic sur une reserve -->
+    <aside id="panneau-detail" class="cache">
+
+      <div class="entete-panneau">
+        <h2 id="panneau-titre-id">Réserve</h2>
+        <button id="bouton-fermer-panneau" title="Fermer">✕</button>
+      </div>
+
+      <div class="ligne-info"><span class="label">EPCI</span><span id="panneau-epci"></span></div>
+      <div class="ligne-info"><span class="label">Commune</span><span id="panneau-commune"></span></div>
+      <div class="ligne-info"><span class="label">Surface</span><span id="panneau-surface"></span></div>
+
+      <div id="bloc-score-final">
+        <div class="ligne-info"><span class="label" id="label-score-principal">Score final</span><span id="valeur-score-final" class="valeur"></span></div>
+        <div class="ligne-info"><span class="label">Classification</span><span id="valeur-classe" class="valeur"></span></div>
+        <div class="ligne-info" id="ligne-rang"><span class="label">Rang</span><span id="valeur-rang" class="valeur"></span></div>
+      </div>
+
+      <h2 id="titre-profil" style="font-size:12px; margin-bottom:6px;">Profil multicritère de la réserve foncière</h2>
+      <div id="bloc-radar">
+        <p class="astuce-radar">Survolez un sommet du radar pour voir le score de la famille de critères, et cliquez par dessus pour voir les détails associés aux sous-critères.</p>
+        <div id="radar-conteneur"></div>
+      </div>
+
+      <div id="detail-famille-clic" class="cache">
+        <p id="sous-titre-detail-famille" class="cache">Détail de la famille de critères</p>
+        <h2 id="titre-detail-famille" style="font-size:12px; margin-bottom:6px;"></h2>
+        <table id="tableau-detail-famille">
+          <thead>
+            <tr><th>Sous-critère</th><th>Evaluation</th></tr>
+          </thead>
+          <tbody>
+            <!-- rempli par radar.js au clic sur un sommet -->
+          </tbody>
+        </table>
+      </div>
+
+    </aside>
+
+  </div>
+
+  <!-- Leaflet -->
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <!-- plugin de clustering -->
+  <script src="https://unpkg.com/leaflet.markercluster@1.5.3/dist/leaflet.markercluster.js"></script>
+  <!-- D3 pour le radar -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.9.0/d3.min.js"></script>
+
+  <!-- mes fichiers, dans cet ordre precis car carte.js definit des variables
+       (COULEURS_CLASSES, LIBELLES_...) utilisees par les deux autres -->
+  <script src="js/carte.js"></script>
+  <script src="js/radar.js"></script>
+  <script src="js/interface.js"></script>
+
+</body>
+</html>
