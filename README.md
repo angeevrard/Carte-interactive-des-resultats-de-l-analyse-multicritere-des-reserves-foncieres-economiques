@@ -17,7 +17,7 @@ Puis ouvrir `http://localhost:8000` dans le navigateur.
 
 **Deux modes d'affichage** :
 - **Résultat général** : colore les réserves selon le score final, légende "Classification du potentiel de mobilisation" (3 classes), panneau de droite avec radar.
-- **Détail de l'analyse par famille de critères** : un sélecteur apparaît pour choisir la famille (4 possibles), colore les réserves selon le score de cette famille, légende "Aptitude à la famille de critères" (favorable/modérée/défavorable), panneau de droite qui remplace le radar par le détail des sous-critères de la famille choisie.
+- **Détail de l'analyse par famille de critères** : un sélecteur apparaît pour choisir la famille (4 possibles), colore les réserves selon le score de cette famille, légende "Aptitude à la famille de critères" (favorable/modérée/défavorable).
 
 **Carte** :
 - Clusters de points à faible zoom, qui éclatent en parcelles + contours de zonage économique au-delà du zoom 13 (`SEUIL_ZOOM_DETAIL`) ou au clic sur un cluster.
@@ -35,23 +35,23 @@ Puis ouvrir `http://localhost:8000` dans le navigateur.
 
 Les fichiers dans `data/` sont les exports de l'analyse via le plugin QGIS.
 
-- **`Resultat_RF_ahp.geojson`** — polygones des parcelles. Champs utilisés : `ID`, `commune`, `epci`, `superficie_ha`, `score_final`, `classe_apt`, `rang`, les 4 scores de famille (`mf_attractivite_geog`, `mf_aptitude_aux_rese`, `mf_enjeux_forestiers`, `mf_aptitude_physique`), les 15 sous-critères standardisés (`std_...`, valeurs 0-1) et leurs 15 équivalents en valeurs brutes non standardisées (mêmes noms sans le préfixe `std_`, ex. `acess_TC`), affichées dans le tableau de détail au clic sur un sommet du radar.
-- **`Centroide_RF.geojson`** — mêmes propriétés, géométrie `Point` (centroïde de chaque parcelle). Sert à la couche de clusters. **Doit rester généré à partir des mêmes données que `Resultat_RF_ahp.geojson`** (mêmes scores/classes).
-- **`Contours_zonage_eco.geojson`** — contours de zonage économique, affichés à partir du zoom détaillé ou après un clic sur un cluster. Pas d'attributs identifiants, juste les critères bruts.
+- **`Resultat_RF_ahp.geojson`** — polygones des parcelles. Champs utilisés : `ID`, `commune`, `epci`, `superficie_ha`, `score_final`, `classe_apt`, `rang`, les 4 scores des familles de critères (`mf_attractivite_geog`, `mf_aptitude_aux_rese`, `mf_enjeux_forestiers`, `mf_aptitude_physique`), les 15 sous-critères standardisés (`std_...`, valeurs 0-1) et leurs valeurs d'observations brutes non standardisées, affichées dans le tableau de détail au clic sur un sommet du radar.
+- **`Centroide_RF.geojson`** — mêmes propriétés, géométrie `Point` (centroïde de chaque parcelle). Sert à la couche de clusters. 
+- **`Contours_zonage_eco.geojson`** — contours de zonage économique, affichés à partir du zoom détaillé ou après un clic sur un cluster. 
 - **`COMMUNE.geojson`**, **`EPCI.geojson`**, **`SCOTERS.geojson`** — limites administratives du territoire d'étude.
 
 ### Classification
 
-3 classes, seuils `< 0,33`, `0,33 – 0,67`, `≥ 0,67`. La couleur affichée (sur la carte et dans le panneau) est **toujours recalculée depuis le score numérique** (`classeDepuisValeur()` dans `carte.js`, valeur arrondie à 2 décimales avant comparaison).
+3 classes, seuils `< 0,33`, `0,33 – 0,67`, `≥ 0,67`. La couleur affichée (sur la carte et dans le panneau) est **recalculée depuis le score numérique** (`classeDepuisValeur()` dans `carte.js`, valeur arrondie à 2 décimales avant comparaison).
 
-## Architecture du dossier de la carte interactive
+## Architecture du dossier 
 
 | Fichier | Contenu |
 |---|---|
 | `index.html` | Structure de la page et tous les textes visibles (titres, libellés, aide, méthodologie...) |
 | `css/style.css` | Couleurs, tailles, thème clair/sombre (variables `--couleur-...` dans `:root` / `body.sombre`) |
-| `js/carte.js` | Carte Leaflet, couches, couleurs des classes, noms des familles/sous-critères, seuils, zoom de bascule clusters/parcelles |
-| `js/radar.js` | Graphique radar D3 et tableau de détail par famille |
+| `js/carte.js` | Carte Leaflet, couches, couleurs des classifications, zoom de bascule clusters/parcelles |
+| `js/radar.js` | Graphique radar et tableau de détail par famille de critères |
 | `js/interface.js` | Cases à cocher, sélecteurs, ouverture/fermeture du panneau, bascule des deux modes |
 | `data/*.geojson` | Les données |
 
