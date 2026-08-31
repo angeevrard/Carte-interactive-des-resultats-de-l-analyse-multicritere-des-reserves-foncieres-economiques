@@ -77,8 +77,8 @@ const SOUS_CRITERES_PAR_FAMILLE = {
 const LIBELLES_SOUS_CRITERES = {
   std_acess_TC: "Accessibilité en transport en commun (par la marche)",
   std_articu_piste_cyclable: "Articulation aux pistes cyclables",
-  std_acess_restauration: "Accès aux services de restauration (par la marche)",
-  std_acess_echangeur: "Accès à un échangeur autoroutier",
+  std_acess_restauration: "Accessibilité à l'offre alimentaire (par la marche)",
+  std_acess_echangeur: "Accessibilité à un échangeur autoroutier",
   std_posi_armature_urbaine: "Position dans l'armature urbaine",
   std_proximite_res_elect: "Proximité aux réseaux électriques",
   std_articu_zae_existante: "Articulation ZAE existante",
@@ -186,7 +186,7 @@ function initCarte() {
     maxZoom: 20,
   });
 
-  const coucheClaire = L.tileLayer("https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png", {
+  const coucheClaire = L.tileLayer("https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png?Key = cb1_2ms7_1_e508590cfb650d292dc73e81", {
     attribution: "&copy; OpenStreetMap contributors &copy; CARTO",
     subdomains: "abcd",
     maxZoom: 19,
