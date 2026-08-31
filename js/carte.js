@@ -186,7 +186,7 @@ function initCarte() {
     maxZoom: 20,
   });
 
-  const coucheClaire = L.tileLayer("https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png?Key = cb1_2ms7_1_e508590cfb650d292dc73e81", {
+  const coucheClaire = L.tileLayer("https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png?key=cb1_2ms7_1_e508590cfb650d292dc73e81", {
     attribution: "&copy; OpenStreetMap contributors &copy; CARTO",
     subdomains: "abcd",
     maxZoom: 19,
