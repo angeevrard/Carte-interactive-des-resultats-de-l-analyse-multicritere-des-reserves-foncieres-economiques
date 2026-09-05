@@ -79,7 +79,7 @@ const LIBELLES_SOUS_CRITERES = {
   std_articu_piste_cyclable: "Articulation aux pistes cyclables",
   std_acess_restauration: "Accessibilité à l'offre alimentaire (par la marche)",
   std_acess_echangeur: "Accessibilité à un échangeur autoroutier",
-  std_posi_armature_urbaine: "Position dans l'armature urbaine",
+  std_posi_armature_urbaine: "Situation dans l'armature urbaine",
   std_proximite_res_elect: "Proximité aux réseaux électriques",
   std_articu_zae_existante: "Articulation ZAE existante",
   std_proximite_aep: "Proximité aux réseaux AEP",
